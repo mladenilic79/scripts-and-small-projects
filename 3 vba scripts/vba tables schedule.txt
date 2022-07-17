@@ -1,0 +1,51 @@
+Sub schedule()
+
+'manual
+'input previous column name
+'input new column name
+
+Dim ppath As String
+Dim nname As String
+Dim tbl As ListObject
+Dim sht As Worksheet
+Dim hheader As Range
+Dim previouscolumnname As String
+Dim newcolumnname As String
+Dim previouscolumnnumber As Long
+Dim lastcolumnnumber As Integer
+
+'back up workbook
+ppath = Application.ActiveWorkbook.Path
+nname = Application.ActiveWorkbook.Name
+nname = Left(nname, Len(nname) - 5)
+ActiveWorkbook.SaveCopyAs ppath & "\" & nname & "-copy.xlsm"
+
+'set names
+previouscolumnname = "SSQ4.1 21"
+newcolumnname = "SSQ2 22"
+
+'loop
+For Each sht In ActiveWorkbook.Worksheets
+For Each tbl In sht.ListObjects
+For Each hheader In tbl.HeaderRowRange
+
+If hheader.Text = previouscolumnname Then
+
+previouscolumnnumber = tbl.ListColumns(previouscolumnname).Index
+tbl.ListColumns.Add(previouscolumnnumber + 1).Name = newcolumnname
+tbl.ListColumns("Plan").DataBodyRange.Copy
+tbl.ListColumns(previouscolumnnumber + 1).DataBodyRange.PasteSpecial xlPasteValues
+
+With tbl.ListColumns(previouscolumnnumber + 1).DataBodyRange
+   .NumberFormat = "mm/dd/yyyy"
+   .Interior.Color = RGB(255, 255, 255)
+   .Font.Color = RGB(0, 0, 0)
+End With
+
+End If
+
+Next hheader
+Next tbl
+Next sht
+
+End Sub

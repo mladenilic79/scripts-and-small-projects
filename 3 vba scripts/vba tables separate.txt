@@ -1,0 +1,45 @@
+Sub separate()
+
+Dim ssheet As Worksheet
+Dim ttable As ListObject
+Dim ppath As String
+Dim columncount As Integer
+Dim nname As String
+
+ppath = Application.ActiveWorkbook.Path
+nname = Application.ActiveWorkbook.Name
+nname = Left(nname, Len(nname) - 5)
+
+ActiveWorkbook.SaveCopyAs ppath & "\" & nname & "-copy.xlsm"
+
+Application.ScreenUpdating = False
+Application.DisplayAlerts = False
+
+For Each ssheet In ActiveWorkbook.Sheets
+For Each ttable In ssheet.ListObjects
+
+If ttable.ListColumns.Count < 3 Then
+GoTo nexttable
+End If
+
+columncount = ttable.ListColumns.Count
+ttable.ListColumns(columncount).Delete
+columncount = ttable.ListColumns.Count
+ttable.ListColumns(columncount).Delete
+columncount = ttable.ListColumns.Count
+ttable.ListColumns(columncount).Delete
+
+nexttable:
+
+Next ttable
+
+ssheet.Copy
+Application.ActiveWorkbook.SaveAs Filename:=ppath & "\" & ssheet.Name & ".xlsx"
+Application.ActiveWorkbook.Close False
+
+Next ssheet
+
+Application.DisplayAlerts = True
+Application.ScreenUpdating = True
+
+End Sub

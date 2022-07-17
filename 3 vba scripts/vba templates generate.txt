@@ -1,0 +1,48 @@
+'prvo otvori outlook i temp
+Sub templates()
+
+Dim outApp As Object
+Dim i As Long
+
+Set outApp = GetObject(, "Outlook.Application")
+Workbooks("temp.xlsm").Activate
+Worksheets("ContactsInput").Activate
+
+'The row in which the list of e-mails start
+i = 2
+
+While Cells(i, 3).Value <> 0
+    updateMail Cells(i, 1), Cells(i, 2), Cells(i, 3), Cells(i, 4)
+    i = i + 1
+Wend
+
+Set outApp = Nothing
+
+End Sub
+
+Sub updateMail(ToBox As String, CcBox As String, Subject As String, Message As String)
+Dim outApp As Object
+Dim outMailItem As Object
+Dim sPath As String, sName As String
+
+sPath = "C:\Users\mi250175\OneDrive - NCR Corporation\Desktop\email templates\"
+sName = Subject
+
+Set outApp = GetObject(, "Outlook.Application")
+Set outMailItem = outApp.CreateItem(0)
+
+'The To, CC and BCC values can send e-mails to multiple recpients
+'just ensure the e-mail addresses are separated with a semicolon (;)
+With outMailItem
+    .To = ToBox
+    .CC = CcBox
+    .Subject = Subject
+    .Body = Message
+    .SaveAs sPath & sName & ".oft"
+End With
+
+CleanUp:
+Set outMailItem = Nothing
+Set outApp = Nothing
+
+End Sub

@@ -1,0 +1,100 @@
+Sub prepare()
+
+Dim tbl As ListObject
+Dim sht As Worksheet
+Dim rng As Range
+Dim colcount As Integer
+
+For Each sht In ActiveWorkbook.Worksheets
+
+'unhide rows and columns
+sht.Columns.EntireColumn.Hidden = False
+sht.Rows.EntireRow.Hidden = False
+
+For Each tbl In sht.ListObjects
+
+'disables filters in table (if error check if any table is missing filters)
+tbl.AutoFilter.ShowAllData
+
+'sort table by first column
+Set rng = tbl.ListColumns(1).DataBodyRange
+With tbl.Sort
+    .SortFields.Clear
+    .SortFields.Add Key:=rng, SortOn:=xlSortOnValues, Order:=xlAscending
+    .Header = xlYes
+    .Apply
+End With
+
+'copy down formula for schedule plan
+colcount = tbl.ListColumns.Count
+tbl.ListColumns(colcount).DataBodyRange.FillDown
+
+'format all cells
+With tbl.Range
+   .HorizontalAlignment = xlCenter
+   .VerticalAlignment = xlBottom
+   .WrapText = False
+   .ShrinkToFit = False
+   .MergeCells = False
+   .Orientation = xlHorizontal
+   .Font.Name = "Calibri"
+   .Font.FontStyle = "Regular"
+   .Font.Size = 11
+   .Font.Underline = xlUnderlineStyleNone
+   .Font.Color = RGB(0, 0, 0)
+   .Font.Strikethrough = False
+   .Font.Subscript = False
+   .Font.Superscript = False
+   .BorderAround LineStyle:=xlContinuous, Weight:=xlThin, Color:=RGB(0, 0, 0)
+   .Borders(xlInsideHorizontal).LineStyle = xlContinuous
+   .Borders(xlInsideHorizontal).Weight = xlThin
+   .Borders(xlInsideHorizontal).Color = RGB(0, 0, 0)
+   .Borders(xlInsideVertical).LineStyle = xlContinuous
+   .Borders(xlInsideVertical).Weight = xlThin
+   .Borders(xlInsideVertical).Color = RGB(0, 0, 0)
+   .Locked = True
+   .Replace What:="/", Replacement:="/"
+End With
+
+'set number format on all but..
+For Each hheader In tbl.HeaderRowRange.Cells
+If hheader.Value <> "ATM ID" And hheader.Value <> "GROUPS" Then
+With tbl.ListColumns(hheader.Value).DataBodyRange
+    .NumberFormat = "mm/dd/yyyy"
+End With
+End If
+Next hheader
+
+'format 1st row only
+With tbl.HeaderRowRange
+   .Font.FontStyle = "Bold"
+   .Font.Color = RGB(255, 255, 255)
+   .Interior.Color = RGB(10, 77, 122)
+End With
+
+'format atm id & gruoups column only
+On Error Resume Next
+With tbl.ListColumns("GROUPS").DataBodyRange
+   .NumberFormat = "General"
+End With
+With tbl.ListColumns("ATM ID").DataBodyRange
+   .NumberFormat = "General"
+End With
+On Error GoTo 0
+
+'autofit table
+tbl.DataBodyRange.EntireColumn.AutoFit
+tbl.DataBodyRange.EntireRow.AutoFit
+
+Next tbl
+
+'remove conditional formating from sheet
+sht.Cells.FormatConditions.Delete
+
+'unprotect sheet
+sht.Unprotect
+
+Next sht
+
+End Sub
+
